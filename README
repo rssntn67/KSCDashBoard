@@ -1,0 +1,57 @@
+KSC dashboard versione 0.1 6-lug-2012
+
+Sviluppato per AscoTlc con licenza Gpl 2.0
+Copyright Antonio Russo
+Ars Informatica s.a.s.
+Via Raffaele Caravaglios 36
+80125 Napoli
+
+Questa cartella contiene le informazioni
+i sorgenti e i file compilati
+per installare la KSC dashboard
+
+La KSC dashboard consente agli utenti
+registrati di opennms di accedere ad una
+pagina che automaticamente apre un KSC
+report che ha il titolo corrispondente 
+al nome dell'utente.
+
+Nel caso il corrispondente KSC report non esistesse
+l'applicazione crea automaticamente un KSC report
+in base alle seguenti semplici regole:
+
+a) Il titolo del report corrisponde allo username
+
+b) Se esistono interfaccie con ifalias contenente
+   lo "username" allora viene aggiunto il corrispon-
+   dente grafico del traffico (mib2.HCbits oppure 
+   mib2.bitsi) al report --- Ovviamente se la 
+   la data collection e' attiva sulla detta interfaccia
+
+c) Se non esistono interfacce corrispondenti al criterio
+   sopra detto, il report viene creato vuoto.
+
+d) L'utente puo' a sua volta modificare il default time
+    graph (7_days) per visualizzare i grafici del report
+    per uno specifico lasso temporale
+
+Ricordiamo che un KSC report e' costituito da una succesione
+di grafici e puo' essere gestito dall'utente admin (o dagli utenti
+con role admin) dalla GUI di opennms.
+L'amministratore di sistema puo' aggiungere, rimuovere
+o modificarei KSC report a suo piacimento.
+
+Gli utenti che devono accedere al solo KSC dashboard
+devono essere utenti esclusivamente con ROLE_DASHBOARD
+
+Contenuto della directory:
+
+src 
+contiene i source file
+
+INSTALL
+contiene le istruzioni per l'installazione
+
+classes
+contiene le classi compilate
+

@@ -1,0 +1,60 @@
+KSC dashboard versione 0.1 6-lug-2012
+
+Sviluppato per AscoTlc con licenza Gpl 2.0
+Copyright Antonio Russo
+Ars Informatica s.a.s.
+Via Raffaele Caravaglios 36
+80125 Napoli
+
+Per installare la KSC dashboard procedere con i seguenti passi:
+
+1) modificare il file $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/web.xml ed aggiungere
+   una nuova servlet per gestire il path della nuova dashboard
+
+   Aggiungere le seguenti righe che definiscono la servet kscDispatcher che si occupa di
+    gestire le richieste:
+
+  <!--  servlet that map requests get mapped to -->
+   <servlet>
+     <servlet-name>kscDispatcher</servlet-name>
+     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+     <load-on-startup>2</load-on-startup>
+   </servlet>
+ 
+
+    Aggiungere le seguenti righe che mappano le URL con estensione .ksc all
+    kscDispatcher servlet definita sopra:
+
+  <servlet-mapping>
+    <servlet-name>kscDispatcher</servlet-name>
+    <url-pattern>*.ksc</url-pattern>
+  </servlet-mapping>
+
+2) creare le seguente directory e copiare i seguenti file:
+
+   cp src/webapp/ascoTlcDashboard.jsp $OPENNMS_HOME/jetty-webapps/opennms
+   cp src/webapp/WEB-INF/kscDispatcher-servlet.xml  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF
+   mkdir $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/jsp/dashboard
+   cp src/webapp/WEB-INF/jsp/dashboard/ascoTlcCustomView.jsp  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/jsp/dashboard
+   mkdir  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/classes/org
+   mkdir  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/classes/org/opennms
+   mkdir  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/classes/org/opennms/web
+   mkdir  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/classes/org/opennms/web/controller
+   mkdir  $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/classes/org/opennms/web/controller/ksc
+   cp classes/org/opennms/web/controller/ksc/* $OPENNMS_HOME/jetty-webapps/opennms/WEB-INF/classes/org/opennms/web/controller/ksc
+
+3) Eseguire il restart di opennms
+
+
+4) A questo punto il software e' installato ma e' ancora attiva la vecchia dashboard
+   per installare la nuova dashboard e' sufficiente copiare ascoTlcDashboard.jsp in dashboard.jsp
+   per ogni evenienza conviene fare un backup della vecchia dashboard.jsp
+ 
+5) la nuova dashboard e' sempre comunque raggiungibile alla seguente URL:
+   http://<opennms_ip_address>:8980/opennms/dashboard/ascoTlcCustomView.ksc
+  
+NB Gli utenti nel ruolo: ROLE_DASHBOARD potranno comunque accedere a tutte le  URL 
+   sotto opennms/dashboard, ovviamente al momento solo ascoTlcCustomView.ksc
+   ha una servlet corrispondente.
+
+
