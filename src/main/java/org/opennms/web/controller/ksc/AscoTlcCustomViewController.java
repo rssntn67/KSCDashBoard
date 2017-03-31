@@ -62,19 +62,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
-import org.opennms.core.utils.ThreadCategory;
 import org.opennms.core.utils.WebSecurityUtils;
 import org.opennms.netmgt.config.KSC_PerformanceReportFactory;
 import org.opennms.netmgt.config.kscReports.Graph;
 import org.opennms.netmgt.config.kscReports.Report;
-import org.opennms.netmgt.dao.SnmpInterfaceDao;
+import org.opennms.netmgt.dao.api.SnmpInterfaceDao;
 import org.opennms.netmgt.model.OnmsCriteria;
 import org.opennms.netmgt.model.OnmsResource;
 import org.opennms.netmgt.model.OnmsSnmpInterface;
 import org.opennms.netmgt.model.PrefabGraph;
 import org.opennms.web.graph.KscResultSet;
-import org.opennms.web.svclayer.KscReportService;
-import org.opennms.web.svclayer.ResourceService;
+import org.opennms.web.svclayer.api.KscReportService;
+import org.opennms.web.svclayer.api.ResourceService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectRetrievalFailureException;
@@ -82,6 +81,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * <p>CustomViewController class.</p>
  *
@@ -91,6 +92,8 @@ import org.springframework.web.servlet.mvc.AbstractController;
  */
 public class AscoTlcCustomViewController extends AbstractController implements InitializingBean {
 
+	 private static final Logger LOG = LoggerFactory.getLogger(AscoTlcCustomViewController.class);
+	 
     private final String DEFAULT_GRAPH_TYPE = "mib2.HCbits";
     private final String OPT_GRAPH_TYPE = "mib2.bits";
     
@@ -212,30 +215,33 @@ public class AscoTlcCustomViewController extends AbstractController implements I
         Set<PrefabGraph> prefabGraphs = new TreeSet<PrefabGraph>();
         removeBrokenGraphsFromReport(report);
         List<Graph> graphCollection = report.getGraphCollection();
+        List<OnmsResource> resources = new ArrayList<OnmsResource>();
         if (!graphCollection.isEmpty()) {
-            List<OnmsResource> resources = getKscReportService().getResourcesFromGraphs(graphCollection);
-            for (int i = 0; i < graphCollection.size(); i++) {
-                Graph graph = graphCollection.get(i);
-                OnmsResource resource = null;
-                try {
-                    resource = resources.get(i);
-                }catch(IndexOutOfBoundsException e) {
-                    log().debug("Resource List Index Out Of Bounds Caught ", e);
-                }
-                
-                resourceMap.put(graph.toString(), resource);
-                if (resource == null) {
-                    log().debug("Could not get resource for graph " + graph + " in report " + report.getTitle());
-                } else {
-                    prefabGraphs.addAll(Arrays.asList(getResourceService().findPrefabGraphsForResource(resource)));
-                }
-                
-                
+        	for (Graph graph: graphCollection) {
+            		resources.add(getKscReportService().getResourceFromGraph(graph));
+        	}
+        }
+        for (int i = 0; i < graphCollection.size(); i++) {
+            Graph graph = graphCollection.get(i);
+            OnmsResource resource = null;
+            try {
+                resource = resources.get(i);
+            }catch(IndexOutOfBoundsException e) {
+                LOG.debug("Resource List Index Out Of Bounds Caught ", e);
             }
+            
+            resourceMap.put(graph.toString(), resource);
+            if (resource == null) {
+                LOG.debug("Could not get resource for graph " + graph + " in report " + report.getTitle());
+            } else {
+                prefabGraphs.addAll(Arrays.asList(getResourceService().findPrefabGraphsForResource(resource)));
+            }
+                
+                
+        }
       
             // Get default graph type from first element of graph_options
             // XXX Do we care about the tests on reportType?
-        }
         
         List<KscResultSet> resultSets = new ArrayList<KscResultSet>(report.getGraphCount());
         for (Graph graph : graphCollection) {
@@ -255,9 +261,7 @@ public class AscoTlcCustomViewController extends AbstractController implements I
             try {
                 displayGraph = getResourceService().getPrefabGraph(displayGraphType);
             } catch (ObjectRetrievalFailureException e) {
-                if (log().isDebugEnabled()) {
-                    log().debug("The prefabricated graph '" + displayGraphType + "' does not exist: " + e, e);
-                }
+                LOG.debug("The prefabricated graph '" + displayGraphType + "' does not exist: " + e, e);
                 displayGraph = null;
             }
             
@@ -356,10 +360,10 @@ public class AscoTlcCustomViewController extends AbstractController implements I
             try {
                 getKscReportService().getResourceFromGraph(graph);
             } catch (ObjectRetrievalFailureException orfe) {
-                log().error("Removing graph '" + graph.getTitle() + "' in KSC report '" + report.getTitle() + "' because the resource it refers to could not be found. Perhaps resource '"+ graph.getResourceId() + "' (or its ancestor) referenced by this graph no longer exists?");
+                LOG.error("Removing graph '" + graph.getTitle() + "' in KSC report '" + report.getTitle() + "' because the resource it refers to could not be found. Perhaps resource '"+ graph.getResourceId() + "' (or its ancestor) referenced by this graph no longer exists?");
                 itr.remove();
             } catch (Throwable e) {
-                log().error("Unexpected error while scanning through graphs in report: " + e.getMessage(), e);
+                LOG.error("Unexpected error while scanning through graphs in report: " + e.getMessage(), e);
                 itr.remove();
             }
         }
@@ -381,10 +385,6 @@ public class AscoTlcCustomViewController extends AbstractController implements I
             });
         }
         
-    }
-
-    private static ThreadCategory log() {
-        return ThreadCategory.getInstance(AscoTlcCustomViewController.class);
     }
 
     /**
