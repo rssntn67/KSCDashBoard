@@ -1,41 +1,31 @@
 <%--
-
-//
-// This file is part of the OpenNMS(R) Application.
-//
-// OpenNMS(R) is Copyright (C) 2002-2008 The OpenNMS Group, Inc.  All rights reserved.
-// OpenNMS(R) is a derivative work, containing both original code, included code and modified
-// code that was published under the GNU General Public License. Copyrights for modified 
-// and included code are below.
-//
-// OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
-//
-// Modifications:
-//
-// 2008 Sep 28: Handle XSS security issues.
-// 2006 Nov 09: Added Read-Only User.
-// 2006 Oct 04: Added zoom capability.
-// 2003 Feb 07: Fixed URLEncoder issues.
-// 2002 Nov 26: Fixed breadcrumbs issue.
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-//
-// For more information contact:
-//      OpenNMS Licensing       <license@opennms.org>
-//      http://www.opennms.org/
-//      http://www.opennms.com/
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2007-2014 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
 
 --%>
 
@@ -52,188 +42,164 @@
 <% final String baseHref = org.opennms.web.api.Util.calculateUrlBase( request ); %>
 
 <%-- A script to Save the file --%>
-<script type="text/javascript"> 
-    function updateReport()
-    {
-        document.view_form.action.value = "Update"; 
-        document.view_form.submit();
-    }
- 
-</script>
+<script type="text/javascript">
+  function updateReport()
+  {
+    document.view_form.action.value = "<c:out value="<%=FormProcViewController.Actions.Update.toString()%>"/>"; 
+    document.view_form.submit();
+  }
 
-<h3>AscoTlc Custom View for User: ${title}</h3>
+</script>
 
 <c:choose>
   <c:when test="${fn:length(resultSets) <= 0}">
-    <div class="boxWrapper">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">No graphs defined</h3>
+    </div>
+    <div class="panel-body">
       <p>There are no graphs defined for this report.</p>
     </div>
+  </div>
   </c:when>
 
   <c:otherwise>
-    <div class="boxWrapper">
-    <form name="view_form" method="get" action="<%= baseHref %>dashboard/ascoTlcCustomView.ksc">
-            <table class="normal" align="center">
-              <c:set var="graphNum" value="0"/>
-              <c:set var="showFootnote1" value="false"/>
-
-              <%-- Loop over each row in the table --%>
-              <c:forEach begin="0" end="${(fn:length(resultSets) / graphsPerLine)}">
-                <tr>
-                  <%-- Then loop over each column in the row --%>
-                  <c:forEach begin="1" end="${graphsPerLine}">
-                    <%-- Since a row might not be full, check to see if we've run out of graphs --%>
-                    <c:if test="${graphNum < fn:length(resultSets)}">
-                      <c:set var="resultSet" value="${resultSets[graphNum]}"/>
-                      
-                      <td align="center">
-                        <table>
-                          <tr>
-                            <th>
-                              ${resultSet.title} <br/>
-                              From: ${resultSet.start} <br/>
-                              To: ${resultSet.end}
-                            </th>
-                            
-                            <th>
-                              <c:if test="${!empty resultSet.resource.parent}">
-                                ${resultSet.resource.parent.resourceType.label}:
-                                <c:choose>
-                                  <c:when test="${(!empty resultSet.resource.parent.link) && loggedIn}">
-                                    <a href="<c:url value='${resultSet.resource.parent.link}'/>">${resultSet.resource.parent.label}</a>
-                                  </c:when>
-                                  <c:otherwise>
-                                    ${resultSet.resource.parent.label}
-                                  </c:otherwise>
-                                </c:choose>
-                                <br />
-                              </c:if>
-                          
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Custom View: ${title}</h3>
+      </div>
+      <div class="panel-body">
+        <form class="form-horizontal" name="view_form" method="get" action="<%= baseHref %>dashboard/ascoTlcCustomView.ksc">
+          <input type="hidden" name="<%=FormProcViewController.Parameters.type%>" value="${reportType}" >
+          <input type="hidden" name="<%=FormProcViewController.Parameters.action%>" value="none">
+          <c:if test="${!empty report}">
+            <input type="hidden" name="<%=FormProcViewController.Parameters.report%>" value="${report}">
+          </c:if>
+          <table id="graph-results" class="table table-condensed" align="center">
+            <c:set var="graphNum" value="0"/>
+            <c:set var="showFootnote1" value="false"/>
+            <%-- Loop over each row in the table --%>
+            <c:forEach begin="0" end="${(fn:length(resultSets) / graphsPerLine)}">
+              <tr>
+                <%-- Then loop over each column in the row --%>
+                <c:forEach begin="1" end="${graphsPerLine}">
+                  <%-- Since a row might not be full, check to see if we've run out of graphs --%>
+                  <c:if test="${graphNum < fn:length(resultSets)}">
+                    <c:set var="resultSet" value="${resultSets[graphNum]}"/>
+                    <td align="center">
+                      <table class="table table-condensed">
+                        <tr>
+                          <th>
+                            ${resultSet.title} <br/>
+                            From: ${resultSet.start} <br/>
+                            To: ${resultSet.end}
+                          </th>
+                          <th>
+                            <c:if test="${!empty resultSet.resource.parent}">
+                              ${resultSet.resource.parent.resourceType.label}:
                               <c:choose>
-                                <c:when test="${fn:contains(resultSet.resource.label,'(*)')}">
-                                  <c:set var="showFootnote1" value="true"/>
-                                  Resource:
+                                <c:when test="${(!empty resultSet.resource.parent.link) && loggedIn}">
+                                  <a href="<c:url value='${resultSet.resource.parent.link}'/>">${resultSet.resource.parent.label}</a>
                                 </c:when>
                                 <c:otherwise>
-                                  ${resultSet.resource.resourceType.label}:
+                                  ${resultSet.resource.parent.label}
                                 </c:otherwise>
                               </c:choose>
-                              <c:choose>
-                                <c:when test="${(!empty resultSet.resource.link) && loggedIn}">
-                                  <a href="<c:url value='${resultSet.resource.link}'/>">${resultSet.resource.label}</a>
-                                </c:when>
-                                <c:otherwise>
-                                  ${resultSet.resource.label}
-                                </c:otherwise>
-                              </c:choose>
-                              
-                              <c:url var="detailUrl" value="${baseHref}graph/results.htm">
-                                <c:param name="resourceId" value="${resultSet.resource.id}"/>
-                                <c:param name="reports" value="all"/>
-                                <c:param name="start" value="${resultSet.start.time}"/>
-                                <c:param name="end" value="${resultSet.end.time}"/>
-                              </c:url>
-  
-                              <a href="${detailUrl}">Detail</a>                            
-                            </th>
-                          </tr>
-                        </table>
-  
-                        <c:url var="zoomUrl" value="${baseHref}graph/results.htm">
-                          <c:param name="resourceId" value="${resultSet.resource.id}"/>
-                          <c:param name="reports" value="${resultSet.prefabGraph.name}"/>
-                          <c:param name="start" value="${resultSet.start.time}"/>
-                          <c:param name="end" value="${resultSet.end.time}"/>
-                          <c:param name="zoom" value="true"/>
-                        </c:url>
-  
-                        <c:url var="graphUrl" value="${baseHref}graph/graph.png">
-                          <c:param name="resourceId" value="${resultSet.resource.id}"/>
-                          <c:param name="report" value="${resultSet.prefabGraph.name}"/>
-                          <c:param name="start" value="${resultSet.start.time}"/>
-                          <c:param name="end" value="${resultSet.end.time}"/>
-                          <c:param name="zoom" value="true"/>
-                        </c:url>
-                        
-                        <a href="${zoomUrl}">
-                          <img src="${graphUrl}" alt="Resource graph: ${resultSet.prefabGraph.title} (click to zoom)"/>
-                        </a>
-                        
-                      </td>
-                      
-                      <c:set var="graphNum" value="${graphNum + 1}"/>
-                    </c:if>
+                              <br />
+                            </c:if>
+                            <c:choose>
+                              <c:when test="${fn:contains(resultSet.resource.label,'(*)')}">
+                                <c:set var="showFootnote1" value="true"/>
+                                Resource:
+                              </c:when>
+                              <c:otherwise>
+                                ${resultSet.resource.resourceType.label}:
+                              </c:otherwise>
+                            </c:choose>
+                            <c:choose>
+                              <c:when test="${(!empty resultSet.resource.link) && loggedIn}">
+                                <a href="<c:url value='${resultSet.resource.link}'/>">${resultSet.resource.label}</a>
+                              </c:when>
+                              <c:otherwise>
+                                ${resultSet.resource.label}
+                              </c:otherwise>
+                            </c:choose>
+                            <c:url var="detailUrl" value="${baseHref}graph/results.htm">
+                              <c:param name="resourceId" value="${resultSet.resource.id}"/>
+                              <c:param name="reports" value="all"/>
+                              <c:param name="start" value="${resultSet.start.time}"/>
+                              <c:param name="end" value="${resultSet.end.time}"/>
+                            </c:url>
+                            <a href="${detailUrl}">Detail</a>                            
+                          </th>
+                        </tr>
+                      </table>
+                      <div class="graph-container" data-graph-zoomable="true" data-resource-id="${resultSet.resource.id}" data-graph-name="${resultSet.prefabGraph.name}" data-graph-title="${resultSet.prefabGraph.title}" data-graph-start="${resultSet.start.time}" data-graph-end="${resultSet.end.time}"></div>
+                    </td>
+                    <c:set var="graphNum" value="${graphNum + 1}"/>
+                  </c:if>
+                </c:forEach>
+              </tr>
+            </c:forEach>
+          </table>
+          <!-- Select Timespan Input --> 
+          <c:if test="${!empty timeSpan}">
+            <div class="form-group">
+              <label class="col-md-2 label-control">Override Graph Timespan</label>
+              <div class="col-md-4">
+                <select class="form-control" name="timespan">
+                  <c:forEach var="option" items="${timeSpans}">
+                    <c:choose>
+                      <c:when test="${timeSpan == option.key}">
+                        <c:set var="selected">selected="selected"</c:set>
+                      </c:when>
+                      <c:otherwise>
+                        <c:set var="selected" value=""/>
+                      </c:otherwise>
+                    </c:choose>
+                    <option value="${option.key}" ${selected}>${option.value}</option>
                   </c:forEach>
-                </tr>
-              </c:forEach>
-            </table>  
-
-
-            <table class="normal">
-              <!-- Select Timespan Input --> 
-              <c:if test="${!empty timeSpan}">
-                <tr>
-                  <td class="normal">
-                    Override Graph Timespan
-                  </td>
-                  <td class="normal">
-                    <select name="timespan">
-                      <c:forEach var="option" items="${timeSpans}">
-                        <c:choose>
-                          <c:when test="${timeSpan == option.key}">
-                            <c:set var="selected">selected="selected"</c:set>
-                          </c:when>
-                          
-                          <c:otherwise>
-                            <c:set var="selected" value=""/>
-                          </c:otherwise>
-                        </c:choose>
-                        <option value="${option.key}" ${selected}>${option.value}</option>
-                      </c:forEach>
-                    </select>  
-                    
-                    (Press update button to reflect option changes to ALL graphs) 
-                  </td>
-                </tr>
-              </c:if>
-  
-              <!-- Select Graph Type --> 
-              <c:if test="${!empty graphType}">
-                <tr>
-                  <td class="normal">
-                    Override Graph Type
-                  </td>
-                  <td class="normal">
-                    <select name="graphtype">
-                      <c:forEach var="option" items="${graphTypes}">
-                        <c:choose>
-                          <c:when test="${graphType == option.key}">
-                            <c:set var="selected">selected="selected"</c:set>
-                          </c:when>
-                          
-                          <c:otherwise>
-                            <c:set var="selected" value=""/>
-                          </c:otherwise>
-                        </c:choose>
-                        <option value="${option.key}" ${selected}>${option.value}</option>
-                      </c:forEach>
-                    </select>  
-                    
-                    (Press update button to reflect option changes to ALL graphs) 
-                  </td>
-                </tr>
-              </c:if>
-            </table>
-
-            <p>
-              <c:if test="${!empty timeSpan || !empty graphType}">
-                <input type="button" value="Update Report View" onclick="updateReport()">
-              </c:if>
-                
-            <p>
-
-    </form>
-    </div>
-
+                </select>
+                <span class="help-block">Press update button to reflect option changes to ALL graphs</span>
+              </div>
+            </div>
+          </c:if>
+          <!-- Select Graph Type --> 
+          <c:if test="${!empty graphType}">
+            <div class="form-group">
+              <label class="col-md-2 label-control">Override Graph Type</label>
+              <div class="col-md-4">
+                <select class="form-control" name="graphtype">
+                  <c:forEach var="option" items="${graphTypes}">
+                    <c:choose>
+                      <c:when test="${graphType == option.key}">
+                        <c:set var="selected">selected="selected"</c:set>
+                      </c:when>
+                      <c:otherwise>
+                        <c:set var="selected" value=""/>
+                      </c:otherwise>
+                    </c:choose>
+                    <option value="${option.key}" ${selected}>${option.value}</option>
+                  </c:forEach>
+                </select>
+                <span class="help-block">Press update button to reflect option changes to ALL graphs</span>
+              </div>
+            </div>
+          </c:if>
+          <!-- Button bar -->
+          <div class="btn-group">
+            <c:if test="${!empty timeSpan || !empty graphType}">
+              <button class="btn btn-default" type="button" onclick="updateReport()">Update Report View</button>
+            </c:if>
+          </div>
+        </form>
+      </div> <!-- panel-body -->
+    </div> <!-- panel -->
   </c:otherwise>
 </c:choose>
+
+<c:if test="${showFootnote1 == true}">
+  <jsp:include page="/includes/footnote1.jsp" flush="false" />
+</c:if>
+
+<jsp:include page="/includes/bootstrap-footer.jsp" flush="false"/>

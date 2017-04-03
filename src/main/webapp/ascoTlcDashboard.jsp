@@ -32,11 +32,11 @@
 <%@page language="java" contentType="text/html" session="true" %>
 
 <jsp:include page="/includes/bootstrap.jsp" flush="false" >
-    <jsp:param name="title" value="Dashboard" />
-    <jsp:param name="headTitle" value="Dashboard" />
+    <jsp:param name="title" value="KSC Dashboard" />
+    <jsp:param name="headTitle" value="KSC Dashboard" />
     <jsp:param name="location" value="dashboard" />
     <jsp:param name="vaadinEmbeddedStyles" value="true" />
-    <jsp:param name="breadcrumb" value="Dashboard" />
+    <jsp:param name="breadcrumb" value="KSC Dashboard" />
 </jsp:include>
 
 <iframe name="dashboard" id="ksc-dashboard" src="dashboard/ascoTlcCustomView.ksc" frameborder="0" style="height:100%; width:100%;"></iframe>
