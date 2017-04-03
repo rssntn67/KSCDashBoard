@@ -39,6 +39,6 @@
     <jsp:param name="breadcrumb" value="Dashboard" />
 </jsp:include>
 
-<iframe name="dashboard" id="ksc-dashboard" src="/dashboard/ascoTlcCustomView.ksc" frameborder="0" style="height:100%; width:100%;"></iframe>
+<iframe name="dashboard" id="ksc-dashboard" src="dashboard/ascoTlcCustomView.ksc" frameborder="0" style="height:100%; width:100%;"></iframe>
 
 <jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>

@@ -51,13 +51,6 @@
 
 <% final String baseHref = org.opennms.web.api.Util.calculateUrlBase( request ); %>
 
-<jsp:include page="/includes/header.jsp" flush="false" >
-  <jsp:param name="title" value="Key SNMP Customized Performance Reports" />
-  <jsp:param name="headTitle" value="AscoTlc DashBoard" />
-  <jsp:param name="breadcrumb" value="AscoTlc DashBoard" />
-</jsp:include>
-
-
 <%-- A script to Save the file --%>
 <script type="text/javascript"> 
     function updateReport()
@@ -244,9 +237,3 @@
 
   </c:otherwise>
 </c:choose>
-
-<c:if test="${showFootnote1 == true}">
-  <jsp:include page="/includes/footnote1.jsp" flush="false" />
-</c:if>
-
-<jsp:include page="/includes/footer.jsp" flush="false"/>
