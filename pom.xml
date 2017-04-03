@@ -24,28 +24,11 @@
       <version>${opennms.version}</version>
       <scope>compile</scope>
     </dependency>
-     <dependency>
-       <groupId>org.opennms.dependencies</groupId>
-       <artifactId>spring-web-dependencies</artifactId>
-       <type>pom</type>
-       <version>${opennms.version}</version>
-     </dependency>     
-     <dependency>
+    <dependency>
       <groupId>org.opennms</groupId>
-      <artifactId>opennms-web-api</artifactId>
+      <artifactId>opennms-web-dependencies</artifactId>
       <version>${opennms.version}</version>
       <scope>compile</scope>
     </dependency>
-     <dependency>
-      <groupId>org.opennms</groupId>
-      <artifactId>opennms-webapp</artifactId>
-      <version>${opennms.version}</version>
-      <scope>compile</scope>
-    </dependency>
-          <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
-      </dependency>    
   </dependencies>
 </project>
