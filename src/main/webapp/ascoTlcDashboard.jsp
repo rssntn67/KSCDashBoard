@@ -30,7 +30,9 @@
 --%>
 
 <%@page language="java" contentType="text/html" session="true" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<% final String baseHref = org.opennms.web.api.Util.calculateUrlBase( request ); %>
 <jsp:include page="/includes/bootstrap.jsp" flush="false" >
     <jsp:param name="title" value="KSC Dashboard" />
     <jsp:param name="headTitle" value="KSC Dashboard" />
@@ -39,6 +41,5 @@
     <jsp:param name="breadcrumb" value="KSC Dashboard" />
 </jsp:include>
 
-<iframe name="dashboard" id="ksc-dashboard" src="dashboard/ascoTlcCustomView.ksc" frameborder="0" style="height:100%; width:100%;"></iframe>
-
+<a href="<c:url value="dashboard/ascoTlcCustomView.ksc"/>">KSC Dashborad</a>
 <jsp:include page="/includes/bootstrap-footer.jsp" flush="true"/>

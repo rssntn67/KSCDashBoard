@@ -49,7 +49,10 @@
         classpath*:/META-INF/opennms/component-service.xml
         classpath*:/META-INF/opennms/component-reporting.xml
 
-        <!-- WARMERGE: insert contextConfigLocation -->
+        /WEB-INF/applicationContext-remote-poller.xml
+      classpath*:/META-INF/opennms/component-service.xml
+      /WEB-INF/applicationContext-cxf-common.xml
+
     </param-value>
   </context-param>
 
@@ -58,7 +61,6 @@
     <param-value>daoContext</param-value>
   </context-param>
 
-  <!-- WARMERGE: insert context-param -->
 
   <filter>
     <!-- This filter has to come before other filters. -->
@@ -172,7 +174,15 @@
     </init-param>
   </filter>
 
-  <!-- WARMERGE: insert filter -->
+  <filter>
+    <filter-name>cache-filter</filter-name>
+    <filter-class>org.opennms.features.poller.remote.gwt.CacheFilter</filter-class>
+  </filter>
+  <filter>
+    <filter-name>proxy</filter-name>
+    <filter-class>org.opennms.container.web.ProxyFilter</filter-class>
+  </filter>
+
 
   <filter-mapping>
     <filter-name>characterEncodingFilter</filter-name>
@@ -274,7 +284,15 @@
     <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
-  <!-- WARMERGE: insert filter-mapping -->
+  <filter-mapping>
+    <filter-name>cache-filter</filter-name>
+    <url-pattern>/RemotePollerMap/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>proxy</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
 
   <!--
     This listener handles setting OpenNMS-specific context properties
@@ -296,7 +314,14 @@
         <param-value>tcp://localhost:61616</param-value>
     </context-param>
 
-  <!-- WARMERGE: insert listener -->
+  <listener>
+    <listener-class>org.opennms.container.web.WebAppListener</listener-class>
+  </listener>
+
+  <listener>
+    <listener-class>org.apache.felix.http.proxy.ProxyListener</listener-class>
+  </listener>
+
 
   <!--
     Configure the JspServlet to use updated compiler syntax.
@@ -781,24 +806,25 @@
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
   </servlet>
-  
-  <!-- KSC dashboard Servlet -->
-  <servlet>
+
+<!-- adding ksc displatcher servelet -->
+
+   <servlet>
      <servlet-name>kscDispatcher</servlet-name>
      <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
      <load-on-startup>2</load-on-startup>
    </servlet>
-  
-
-  <!-- KSC dashboard Servlet mapping -->
-  <servlet-mapping>
-    <servlet-name>kscDispatcher</servlet-name>
-    <url-pattern>*.ksc</url-pattern>
-  </servlet-mapping>
+ 
 
   <!-- desktop graph servlet mapping -->
   <!-- desktop survey report servlet mapping -->
 
+
+<!-- Adding KSC servlet mapping -->
+  <servlet-mapping>
+    <servlet-name>kscDispatcher</servlet-name>
+    <url-pattern>*.ksc</url-pattern>
+  </servlet-mapping>
 
   <servlet-mapping>
   	<servlet-name>purdyChart</servlet-name>
@@ -1100,8 +1126,72 @@
         <url-pattern>/graph/graph.png</url-pattern>
   </servlet-mapping>
 
-  <!-- WARMERGE: insert servlet -->
-  <!-- WARMERGE: insert servlet-mapping -->
+  <servlet>
+    <servlet-name>EventService</servlet-name>
+    <servlet-class>de.novanic.eventservice.service.EventServiceImpl</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <servlet-name>LocationStatusService</servlet-name>
+    <servlet-class>org.opennms.features.poller.remote.gwt.server.LocationStatusServiceImpl</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>proxy</servlet-name>
+    <servlet-class>org.apache.felix.http.proxy.ProxyServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <!--  RESTful Web Services -->
+  <servlet>
+    <servlet-name>cxfRestServlet</servlet-name>
+    <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+    <init-param>
+      <param-name>config-location</param-name>
+      <param-value>/WEB-INF/applicationContext-cxf-rest-v1.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>service-list-path</param-name>
+      <param-value>wadl-services</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>cxfRest2Servlet</servlet-name>
+    <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+    <init-param>
+      <param-name>config-location</param-name>
+      <param-value>/WEB-INF/applicationContext-cxf-rest-v2.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>service-list-path</param-name>
+      <param-value>wadl-services</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>EventService</servlet-name>
+    <url-pattern>/RemotePollerMap/gwteventservice</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>LocationStatusService</servlet-name>
+    <url-pattern>/RemotePollerMap/locationStatus</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>proxy</servlet-name>
+    <url-pattern>/osgi/*</url-pattern>
+  </servlet-mapping>
+  <!-- Servlet mappings for REST Services -->
+  <servlet-mapping>
+    <servlet-name>cxfRestServlet</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>cxfRest2Servlet</servlet-name>
+    <url-pattern>/api/v2/*</url-pattern>
+  </servlet-mapping>
+
 
   <error-page>
     <exception-type>org.opennms.web.category.CategoryNotFoundException</exception-type>

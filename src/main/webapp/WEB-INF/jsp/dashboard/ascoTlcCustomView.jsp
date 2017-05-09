@@ -41,6 +41,12 @@
 
 <% final String baseHref = org.opennms.web.api.Util.calculateUrlBase( request ); %>
 
+<jsp:include page="/includes/bootstrap.jsp" flush="false" >
+  <jsp:param name="title" value="KSC Dashboard" />
+  <jsp:param name="headTitle" value="KSC Dashboard" />
+  <jsp:param name="renderGraphs" value="true" />
+</jsp:include>
+
 <%-- A script to Save the file --%>
 <script type="text/javascript">
   function updateReport()
@@ -197,9 +203,5 @@
     </div> <!-- panel -->
   </c:otherwise>
 </c:choose>
-
-<c:if test="${showFootnote1 == true}">
-  <jsp:include page="/includes/footnote1.jsp" flush="false" />
-</c:if>
 
 <jsp:include page="/includes/bootstrap-footer.jsp" flush="false"/>

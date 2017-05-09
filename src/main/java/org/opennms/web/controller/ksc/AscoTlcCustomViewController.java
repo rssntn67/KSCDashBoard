@@ -132,9 +132,9 @@ public class AscoTlcCustomViewController extends AbstractController implements I
             editor.loadNewWorkingReport();
             Report newreport = editor.getWorkingReport();
             newreport.setTitle(username);
-            newreport.setShow_graphtype_button(false);
-            newreport.setGraphs_per_line(getDefaultGraphsPerLine());
-            newreport.setShow_timespan_button(true);
+            newreport.setShowGraphtypeButton(false);
+            newreport.setGraphsPerLine(getDefaultGraphsPerLine());
+            newreport.setShowTimespanButton(true);
             System.out.println("AscoTlc: DEBUG creating new KSC report for username: "+username);
 
             List<String> resources = new ArrayList<String>();
@@ -304,7 +304,7 @@ public class AscoTlcCustomViewController extends AbstractController implements I
         modelAndView.addObject("title", report.getTitle());
         modelAndView.addObject("resultSets", resultSets);
         
-        if (report.getShow_timespan_button()) {
+        if (report.getShowTimespanButton()) {
             if (overrideTimespan == null || !getKscReportService().getTimeSpans(true).containsKey(overrideTimespan)) {
                 modelAndView.addObject("timeSpan", "none");
             } else {
@@ -316,7 +316,7 @@ public class AscoTlcCustomViewController extends AbstractController implements I
             modelAndView.addObject("timeSpan", null);
         }
 
-        if (report.getShow_graphtype_button()) {
+        if (report.getShowGraphtypeButton()) {
             LinkedHashMap<String, String> graphTypes = new LinkedHashMap<String, String>();
             graphTypes.put("none", "none");
             for (PrefabGraph graphOption : prefabGraphs) {
@@ -336,8 +336,8 @@ public class AscoTlcCustomViewController extends AbstractController implements I
         
         modelAndView.addObject("showCustomizeButton", false);
 
-        if (report.getGraphs_per_line() > 0) {
-            modelAndView.addObject("graphsPerLine", report.getGraphs_per_line());
+        if (report.getGraphsPerLine() > 0) {
+            modelAndView.addObject("graphsPerLine", report.getGraphsPerLine());
         } else {
             modelAndView.addObject("graphsPerLine", getDefaultGraphsPerLine());
         }
